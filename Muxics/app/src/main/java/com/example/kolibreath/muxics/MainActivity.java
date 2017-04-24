@@ -1,6 +1,7 @@
 package com.example.kolibreath.muxics;
 
 import android.content.Context;
+import android.nfc.cardemulation.HostApduService;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GravityCompat;
@@ -10,12 +11,16 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -35,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mdrawerLayout;
     private Toolbar toolbar;
     List<Music> musicList = new ArrayList<>();
-    private ListView listView;
+    private RecyclerView listView;
 
     private void initMusicItem(){
         for (int i=0;i<15;i++) {
@@ -45,19 +50,16 @@ public class MainActivity extends AppCompatActivity {
     }
     private void initListView()
     {
-        MusicAdapter adapter = new MusicAdapter(MainActivity.this,R.layout.music_list_item,musicList);
-        listView.setAdapter(adapter
-
-
-
-
-        );
+        listView = (RecyclerView) findViewById(R.id.musicList);
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        listView.setLayoutManager(manager);
+        MusicRecylerAdpter adpter = new MusicRecylerAdpter(musicList);
+        listView.setAdapter(adpter);
     }
     private void initWidget(){
        // textView = (TextView) findViewById(R.id.testText);
         mdrawerLayout = (DrawerLayout) findViewById(R.id.mdrawLayout);
         toolbar = (Toolbar) findViewById(R.id.toolBarForMainActivity);
-        listView = (ListView) findViewById(R.id.musicList);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -86,22 +88,39 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-    class MusicAdapter extends ArrayAdapter<Music>{
 
-        private int resourceId;
-        public MusicAdapter(Context context, int resoureceId, List<Music> list){
-            super(context,resoureceId,list);
-            this.resourceId =resoureceId;
+    class MusicRecylerAdpter extends RecyclerView.Adapter<MusicRecylerAdpter.ViewHolder>{
+        private List<Music> Mlist;
 
+        public MusicRecylerAdpter(List<Music> list){
+            Mlist = list;
         }
-        @NonNull
+
         @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            Music music = getItem(position);
-            View view = LayoutInflater.from(getContext()).inflate(resourceId,parent,false);
-            TextView textView  = (TextView) view.findViewById(R.id.nameOfSong);
-            textView.setText(music.getName());
-            return view;
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view  = LayoutInflater.from(parent.getContext()).inflate(R.layout.music_list_item,parent,false);
+            ViewHolder viewHolder = new ViewHolder(view);
+            return viewHolder;
+        }
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Music music  = Mlist.get(position);
+            holder.textView.setText(music.getName());
+        }
+
+        class ViewHolder extends RecyclerView.ViewHolder{
+            private TextView textView;
+            public ViewHolder(View view ){
+                super(view);
+                textView = (TextView) view.findViewById(R.id.nameOfSong);
+
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return Mlist.size();
         }
     }
+
 }
